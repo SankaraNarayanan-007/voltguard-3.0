@@ -1,0 +1,1103 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    color: white;
+    overflow: hidden;
+}
+
+.bg {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at top right, #110022, #050010, #000000);
+    z-index: -2;
+}
+
+/* CAR IMAGE BACKGROUND */
+.car-bg {
+    position: fixed;
+    bottom: -24%;
+    right: -100px;              /* ← replaces left + transform */
+    width: calc(100vw - 340px);
+    height: auto;
+    z-index: 6;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    opacity: 0.85;
+}
+
+.dashboard-container {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+    gap: 20px;
+    position: relative;
+    z-index: 5;
+}
+
+.glass {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 16px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.sidebar {
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    padding: 25px 15px;
+    flex-shrink: 0;
+}
+
+.brand {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo {
+    color: #a855f7;
+    text-shadow: 0 0 10px #a855f7;
+}
+
+.nav-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.nav-item svg {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+    opacity: 0.85;
+}
+
+.nav-item {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 14px 18px;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.nav-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    padding-left: 24px;
+}
+
+.nav-item.active {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 0 15px rgba(124, 58, 237, 0.4);
+}
+
+.content-panel {
+    flex-grow: 1;
+    padding: 40px;
+    overflow-y: auto;
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.4s ease forwards;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+h2 {
+    margin-top: 0;
+    font-size: 26px;
+    font-weight: 500;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+h2 svg {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+    color: #a855f7;
+    filter: drop-shadow(0 0 6px rgba(168,85,247,0.6));
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.metric-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 25px;
+    transition: transform 0.2s;
+}
+
+.metric-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(168, 85, 247, 0.4);
+}
+
+.metric-card h3 {
+    margin: 0;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.metric-value {
+    margin: 15px 0 0 0;
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.view-flex {
+    display: flex;
+    align-items: center;
+    gap: 50px;
+    margin-top: 40px;
+}
+
+.status-readout h3 {
+    font-size: 36px;
+    margin: 0 0 10px 0;
+}
+
+.status-readout p {
+    color: rgba(255, 255, 255, 0.6);
+    max-width: 400px;
+    line-height: 1.6;
+}
+
+.battery3d {
+    width: 80px;
+    height: 150px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-radius: 10px;
+    position: relative;
+    padding: 4px;
+}
+
+.battery-fill {
+    width: calc(100% - 8px);
+    position: absolute;
+    bottom: 4px;
+    background: linear-gradient(to top, #22c55e, #4ade80);
+    border-radius: 6px;
+    transition: height 0.3s ease;
+}
+
+.soh-ring {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 6px solid rgba(255, 255, 255, 0.05);
+    border-top: 6px solid #3b82f6;
+    animation: spin 2s linear infinite;
+}
+
+.rul-disc {
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, #eab308, transparent);
+    border-radius: 50%;
+    opacity: 0.7;
+    animation: pulseGlow 2s infinite alternate;
+}
+
+.risk-box {
+    width: 100px;
+    height: 100px;
+    border-radius: 12px;
+    background: #22c55e;
+    transition: background 0.5s ease;
+}
+
+.ai-scan {
+    width: 160px;
+    height: 100px;
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    background: rgba(168, 85, 247, 0.05);
+}
+
+.ai-scan::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 4px;
+    background: #a855f7;
+    box-shadow: 0 0 10px #a855f7;
+    animation: scan 2s linear infinite;
+}
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+@keyframes scan { 0% { top: 0%; } 50% { top: 100%; } 100% { top: 0%; } }
+@keyframes pulseGlow { from { transform: scale(0.95); opacity: 0.5; } to { transform: scale(1.05); opacity: 0.8; } }
+
+/* ---------------------------------------------------------------
+   NEW: EXTRA TELEMETRY (current / power / cycles) + SWITCH BADGES
+--------------------------------------------------------------- */
+.sub-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.metric-card.compact {
+    padding: 18px 20px;
+}
+
+.metric-card.compact .metric-value {
+    font-size: 24px;
+    margin-top: 8px;
+}
+
+.switch-status-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.switch-chip {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.75);
+}
+
+.switch-chip .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    flex-shrink: 0;
+}
+
+.switch-chip .dot.on { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+.switch-chip .dot.off { background: #6b7280; box-shadow: none; }
+.switch-chip .dot.warn { background: #eab308; box-shadow: 0 0 8px #eab308; }
+
+.battery-status-banner {
+    margin-top: 20px;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    background: rgba(34, 197, 94, 0.08);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: #4ade80;
+    transition: all 0.3s ease;
+}
+
+.battery-status-banner.warn {
+    background: rgba(234, 179, 8, 0.08);
+    border-color: rgba(234, 179, 8, 0.35);
+    color: #facc15;
+}
+
+.battery-status-banner.danger {
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #f87171;
+}
+
+/* ---------------------------------------------------------------
+   NEW: DETAIL LISTS (used in Battery Health / SOH / RUL / Charging)
+--------------------------------------------------------------- */
+.detail-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 26px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.detail-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 4px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    font-size: 14px;
+}
+
+.detail-row .label {
+    color: rgba(255,255,255,0.5);
+}
+
+.detail-row .value {
+    font-weight: 600;
+    color: #fff;
+}
+
+.grade-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+
+.grade-excellent { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.4); }
+.grade-good { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.4); }
+.grade-fair { background: rgba(234,179,8,0.15); color: #facc15; border: 1px solid rgba(234,179,8,0.4); }
+.grade-poor { background: rgba(249,115,22,0.15); color: #fb923c; border: 1px solid rgba(249,115,22,0.4); }
+.grade-critical { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.4); }
+
+/* ---------------------------------------------------------------
+   NEW: TIP / SUGGESTION BOX (present on every deep-dive tab)
+--------------------------------------------------------------- */
+.tip-box {
+    margin-top: 26px;
+    display: flex;
+    gap: 14px;
+    background: rgba(168, 85, 247, 0.06);
+    border: 1px solid rgba(168, 85, 247, 0.25);
+    border-radius: 14px;
+    padding: 18px 22px;
+}
+
+.tip-box .tip-icon {
+    font-size: 20px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.tip-box .tip-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #c084fc;
+    margin-bottom: 4px;
+}
+
+.tip-box .tip-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.75);
+}
+
+/* ---------------------------------------------------------------
+   NEW: CHECKLISTS (Risk Evaluation / AI Diagnostics)
+--------------------------------------------------------------- */
+.check-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 30px;
+    width: 100%;
+}
+
+.check-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 14px 18px;
+    transition: border-color 0.2s;
+}
+
+.check-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.check-icon.ok { background: rgba(34,197,94,0.15); color: #4ade80; }
+.check-icon.warn { background: rgba(234,179,8,0.15); color: #facc15; }
+.check-icon.bad { background: rgba(239,68,68,0.15); color: #f87171; }
+
+.check-body { flex-grow: 1; }
+
+.check-body .check-name {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.check-body .check-detail {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 2px;
+}
+
+/* ---------------------------------------------------------------
+   NEW: CHARGING DETAIL CARDS
+--------------------------------------------------------------- */
+.charge-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.charge-mini-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 16px 18px;
+}
+
+.charge-mini-card .mini-label {
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 8px;
+}
+
+.charge-mini-card .mini-value {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+/* ---------------------------------------------------------------
+   NEW: SOH GAUGE NUMBER OVERLAY (keeps existing spinning ring)
+--------------------------------------------------------------- */
+.soh-ring-wrap {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.soh-ring-wrap .soh-ring {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.soh-ring-wrap .soh-ring-label {
+    position: relative;
+    font-size: 15px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.8);
+}
+
+/* ---------------------------------------------------------------
+   NEW: USER BAR / SIGN OUT BUTTON
+--------------------------------------------------------------- */
+.user-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 4px 20px 4px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.user-name {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.8);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.logout-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(168, 85, 247, 0.12);
+    border: 1px solid rgba(168, 85, 247, 0.4);
+    color: #e9d5ff;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+}
+
+.logout-btn:hover {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: white;
+    box-shadow: 0 0 12px rgba(168,85,247,0.4);
+}
+
+.logout-btn:active {
+    transform: translateY(1px);
+}
+
+/* ---------------------------------------------------------------
+   NEW: VEHICLE / FLEET OVERVIEW (login-type aware panel)
+--------------------------------------------------------------- */
+.vehicle-overview-card {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 20px 26px;
+    margin-bottom: 22px;
+}
+
+.vehicle-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 0 15px rgba(168,85,247,0.35);
+}
+
+.vehicle-overview-details h3 {
+    font-size: 19px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.vehicle-overview-details p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+}
+
+.fleet-table-wrap {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 22px;
+}
+
+.fleet-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+}
+
+.fleet-table th {
+    text-align: left;
+    padding: 14px 18px;
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.5);
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.fleet-table td {
+    padding: 14px 18px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.85);
+}
+
+.fleet-table tr.live-row {
+    background: rgba(168, 85, 247, 0.06);
+}
+
+.fleet-status-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.fleet-status-pill.ok { background: rgba(34,197,94,0.15); color: #4ade80; }
+.fleet-status-pill.warn { background: rgba(234,179,8,0.15); color: #facc15; }
+.fleet-status-pill.bad { background: rgba(239,68,68,0.15); color: #f87171; }
+.fleet-status-pill.pending { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); }
+
+/* ---------------------------------------------------------------
+   NEW: FAST CHARGE ADVISOR VERDICT BANNER
+--------------------------------------------------------------- */
+.fastcharge-verdict {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 22px 26px;
+    border-radius: 16px;
+    margin-bottom: 10px;
+    background: rgba(34, 197, 94, 0.07);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    transition: all 0.3s ease;
+}
+
+.fastcharge-verdict.caution {
+    background: rgba(234, 179, 8, 0.07);
+    border-color: rgba(234, 179, 8, 0.3);
+}
+
+.fastcharge-verdict.no {
+    background: rgba(239, 68, 68, 0.07);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.fastcharge-verdict .fc-icon {
+    font-size: 32px;
+}
+
+.fastcharge-verdict h3 {
+    font-size: 22px;
+    margin-bottom: 4px;
+}
+
+.fastcharge-verdict p {
+    font-size: 13.5px;
+    color: rgba(255,255,255,0.6);
+}
+
+/* ---------------------------------------------------------------
+   NEW: HELP & SUPPORT — fixed floating launcher, popup menu,
+   helpline modal, and the AI Battery Assistant chat panel
+--------------------------------------------------------------- */
+.help-widget {
+    position: fixed;
+    bottom: 26px;
+    right: 26px;
+    z-index: 200;
+}
+
+.help-fab {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    box-shadow: 0 4px 24px rgba(168, 85, 247, 0.55);
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.help-fab:hover {
+    transform: translateY(-2px) scale(1.06);
+    box-shadow: 0 6px 30px rgba(168, 85, 247, 0.75);
+}
+
+.help-fab svg {
+    width: 26px;
+    height: 26px;
+    position: relative;
+    z-index: 1;
+}
+
+.help-fab-ring {
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 2px solid rgba(168, 85, 247, 0.55);
+    animation: helpFabPulse 2.4s ease-out infinite;
+}
+
+@keyframes helpFabPulse {
+    0% { transform: scale(0.9); opacity: 0.7; }
+    70% { transform: scale(1.35); opacity: 0; }
+    100% { transform: scale(1.35); opacity: 0; }
+}
+
+.help-menu {
+    position: absolute;
+    bottom: 68px;
+    right: 0;
+    width: 214px;
+    background: rgba(18, 7, 32, 0.97);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(8px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    z-index: 30;
+}
+
+.help-menu.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.help-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.85);
+    padding: 11px 12px;
+    border-radius: 9px;
+    font-size: 13.5px;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.help-menu-item:hover {
+    background: rgba(168, 85, 247, 0.18);
+    color: #fff;
+}
+
+.help-menu-icon {
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+/* Helpline modal */
+.help-modal-overlay {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 100;
+}
+
+.help-modal-overlay.open {
+    display: flex;
+}
+
+.help-modal {
+    position: relative;
+    width: 100%;
+    max-width: 380px;
+    padding: 32px;
+    border-radius: 18px;
+    margin: 20px;
+}
+
+.help-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.help-modal h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.help-modal-sub {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 24px;
+}
+
+.helpline-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+}
+
+.helpline-option .hl-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: rgba(255, 255, 255, 0.45);
+    margin-bottom: 4px;
+}
+
+.helpline-option .hl-value {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.helpline-option .hl-icon {
+    font-size: 18px;
+    opacity: 0.8;
+}
+
+.help-call-btn {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    margin-top: 18px;
+    margin-bottom: 0;
+}
+
+.help-modal-footnote {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.3);
+    text-align: center;
+    margin-top: 12px;
+}
+
+/* AI Battery Assistant chat panel */
+.ai-chat-panel {
+    display: none;
+    flex-direction: column;
+    position: fixed;
+    bottom: 26px;
+    right: 26px;
+    width: 370px;
+    height: 540px;
+    max-height: calc(100vh - 52px);
+    background: rgba(14, 6, 27, 0.94);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 18px;
+    box-shadow: 0 20px 55px rgba(0, 0, 0, 0.6);
+    z-index: 110;
+    overflow: hidden;
+}
+
+.ai-chat-panel.open {
+    display: flex;
+    animation: aiPanelIn 0.22s ease;
+}
+
+@keyframes aiPanelIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.ai-chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    flex-shrink: 0;
+}
+
+.ai-chat-title {
+    font-size: 14.5px;
+    font-weight: 700;
+}
+
+.ai-chat-subtitle {
+    font-size: 11px;
+    font-weight: 400;
+    opacity: 0.85;
+    margin-top: 2px;
+}
+
+.ai-chat-close {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.18);
+    border: none;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.ai-chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ai-msg {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 13.3px;
+    line-height: 1.55;
+    white-space: pre-line;
+}
+
+.ai-msg.bot {
+    align-self: flex-start;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom-left-radius: 4px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.ai-msg.user {
+    align-self: flex-end;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    border-bottom-right-radius: 4px;
+    color: white;
+}
+
+.ai-typing-wrap {
+    padding: 12px 16px !important;
+}
+
+.ai-typing {
+    display: flex;
+    gap: 4px;
+}
+
+.ai-typing span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.55);
+    animation: aiTypingBounce 1.2s infinite ease-in-out;
+}
+
+.ai-typing span:nth-child(2) { animation-delay: 0.15s; }
+.ai-typing span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes aiTypingBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-4px); opacity: 1; }
+}
+
+.ai-chat-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0 14px 12px 14px;
+    flex-shrink: 0;
+}
+
+.ai-chip {
+    background: rgba(168, 85, 247, 0.12);
+    border: 1px solid rgba(168, 85, 247, 0.35);
+    color: #e9d5ff;
+    font-size: 11.5px;
+    padding: 6px 11px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.ai-chip:hover {
+    background: rgba(168, 85, 247, 0.25);
+}
+
+.ai-chat-input-row {
+    display: flex;
+    gap: 8px;
+    padding: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
+}
+
+.ai-chat-input-row input {
+    flex-grow: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: white;
+    font-size: 13.5px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.ai-chat-input-row input:focus {
+    border-color: #a855f7;
+}
+
+.ai-chat-input-row input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.ai-chat-send {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: opacity 0.2s;
+}
+
+.ai-chat-send:hover {
+    opacity: 0.9;
+}
+
+@media (max-width: 720px) {
+    .ai-chat-panel {
+        left: 10px;
+        right: 10px;
+        width: auto;
+        bottom: 10px;
+        height: 72vh;
+    }
+
+    .help-widget {
+        bottom: 16px;
+        right: 16px;
+    }
+}

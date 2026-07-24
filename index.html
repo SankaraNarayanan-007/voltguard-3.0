@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoltGuard AI Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Paho MQTT Library for WebSockets -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
+</head>
+<body>
+
+    <div class="bg"></div>
+    <img class="car-bg" src="car-bg.png" alt="" />
+
+    <div class="dashboard-container">
+        <aside class="sidebar glass">
+            <div class="brand">
+                <span class="logo">⚡</span> VoltGuard AI
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-item active" onclick="switchTab('telemetry')">Realtime Metrics</button>
+                <button class="nav-item" onclick="switchTab('health')">Battery Health</button>
+                <button class="nav-item" onclick="switchTab('soh')">State of Health (SOH)</button>
+                <button class="nav-item" onclick="switchTab('rul')">Remaining Useful Life</button>
+                <button class="nav-item" onclick="switchTab('risk')">Risk Evaluation</button>
+                <button class="nav-item" onclick="switchTab('ai')">AI Diagnostics</button>
+                <button class="nav-item" onclick="switchTab('charging')">Smart Charging</button>
+                <button class="nav-item" onclick="switchTab('fastcharge')">Fast Charge Advisor</button>
+            </nav>
+        </aside>
+
+        <main class="content-panel glass">
+
+            <!-- Vehicle / Fleet Overview (populated based on account type) -->
+            <div id="vehicle-overview-container"></div>
+
+            <!-- ESP32 Telemetry Connection Header -->
+            <div class="conn-bar" style="display: flex; align-items: center; justify-content: space-between; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 12px 20px; margin-bottom: 24px;">
+                <div class="conn-status" style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 500;">
+                    <div id="conn-indicator" class="status-dot" style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 8px #ef4444;"></div>
+                    <span id="conn-text">Connecting to ESP32 Gateway...</span>
+                </div>
+                <div class="conn-controls" style="display: flex; gap: 10px;">
+                    <button class="btn-conn" style="background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: #ffffff; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem;" onclick="connectBLE()">Pair Direct Bluetooth</button>
+                    <button class="btn-conn" style="background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: #ffffff; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem;" onclick="reconnectMQTT()">Reconnect Wi-Fi (MQTT)</button>
+                </div>
+            </div>
+
+            <!-- Tab 1: Realtime Telemetry -->
+            <section id="telemetry" class="tab-content active">
+                <h2>Realtime ESP32 Telemetry</h2>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <h3>Voltage</h3>
+                        <p id="main-voltage" class="metric-value">-- V</p>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Temperature</h3>
+                        <p id="main-temp" class="metric-value">-- °C</p>
+                    </div>
+                    <div class="metric-card">
+                        <h3>State of Charge (SOC)</h3>
+                        <p id="main-soc" class="metric-value">-- %</p>
+                    </div>
+                </div>
+
+                <div class="sub-metrics-grid">
+                    <div class="metric-card compact">
+                        <h3>Current</h3>
+                        <p id="main-current" class="metric-value">-- A</p>
+                    </div>
+                    <div class="metric-card compact">
+                        <h3>Power</h3>
+                        <p id="main-power" class="metric-value">-- W</p>
+                    </div>
+                    <div class="metric-card compact">
+                        <h3>Charge Cycles</h3>
+                        <p id="main-cycles" class="metric-value">--</p>
+                    </div>
+                </div>
+
+                <div class="switch-status-row">
+                    <div class="switch-chip"><span id="chip-chgmos" class="dot"></span> Charge MOSFET: <span id="chgmos-text">--</span></div>
+                    <div class="switch-chip"><span id="chip-dismos" class="dot"></span> Discharge MOSFET: <span id="dismos-text">--</span></div>
+                    <div class="switch-chip"><span id="chip-balance" class="dot"></span> Cell Balancing: <span id="balance-text">--</span></div>
+                    <div class="switch-chip"><span id="chip-heat" class="dot"></span> Heating: <span id="heat-text">--</span></div>
+                </div>
+
+                <div id="battery-status-banner" class="battery-status-banner">Waiting for telemetry to evaluate battery status…</div>
+            </section>
+
+            <!-- Tab 2: Battery Health -->
+            <section id="health" class="tab-content">
+                <h2>Battery Capacity Deep Dive</h2>
+                <div class="view-flex">
+                    <div class="battery3d"><div id="battery-fill-bar" class="battery-fill"></div></div>
+                    <div class="status-readout">
+                        <h3 id="health-percentage">--</h3>
+                        <p>Remaining calculated chemical energy capacity.</p>
+                    </div>
+                </div>
+
+                <div class="detail-list">
+                    <div class="detail-row"><span class="label">Pack Voltage</span><span id="bh-voltage" class="value">-- V</span></div>
+                    <div class="detail-row"><span class="label">Estimated Remaining Energy</span><span id="bh-remaining-energy" class="value">-- Wh</span></div>
+                    <div class="detail-row"><span class="label">Charge / Discharge Cycles</span><span id="bh-cycles" class="value">--</span></div>
+                    <div class="detail-row"><span class="label">Capacity Grade</span><span id="bh-grade" class="grade-badge grade-good">--</span></div>
+                </div>
+
+                <div class="tip-box">
+                    <span class="tip-icon">🔋</span>
+                    <div>
+                        <div class="tip-title">Battery Tip</div>
+                        <div id="bh-tip" class="tip-text">Connect the ESP32 gateway to see a live capacity breakdown and personalized care tips.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 3: SOH -->
+            <section id="soh" class="tab-content">
+                <h2>State of Health (SOH)</h2>
+                <div class="view-flex">
+                    <div class="soh-ring-wrap">
+                        <div class="soh-ring"></div>
+                        <span id="soh-ring-label" class="soh-ring-label">--</span>
+                    </div>
+                    <div class="status-readout">
+                        <h3 id="soh-value">--</h3>
+                        <p>Overall State of Health, derived from voltage headroom, charge level and accumulated wear.</p>
+                    </div>
+                </div>
+
+                <div class="detail-list">
+                    <div class="detail-row"><span class="label">Voltage Contribution</span><span id="soh-voltage-score" class="value">--</span></div>
+                    <div class="detail-row"><span class="label">Charge Level Contribution</span><span id="soh-soc-score" class="value">--</span></div>
+                    <div class="detail-row"><span class="label">Cumulative Degradation Penalty</span><span id="soh-degradation" class="value">--</span></div>
+                    <div class="detail-row"><span class="label">Health Grade</span><span id="soh-grade" class="grade-badge grade-good">--</span></div>
+                </div>
+
+                <div class="tip-box">
+                    <span class="tip-icon">🩺</span>
+                    <div>
+                        <div class="tip-title">Health Insight</div>
+                        <div id="soh-tip" class="tip-text">SOH combines real-time voltage, charge level and thermal-cycle wear into a single health score.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 4: RUL -->
+            <section id="rul" class="tab-content">
+                <h2>Remaining Useful Life (RUL)</h2>
+                <div class="view-flex">
+                    <div class="rul-disc"></div>
+                    <div class="status-readout">
+                        <h3 id="rul-value">--</h3>
+                        <p>Projected years of useful service before the pack falls below the 80% SOH replacement threshold.</p>
+                    </div>
+                </div>
+
+                <div class="detail-list">
+                    <div class="detail-row"><span class="label">Long-Term Pack Health</span><span id="rul-current-soh" class="value">--</span></div>
+                    <div class="detail-row"><span class="label">Replacement Threshold</span><span class="value">80% SOH</span></div>
+                    <div class="detail-row"><span class="label">Thermal Acceleration Factor</span><span id="rul-thermal-factor" class="value">--</span></div>
+                    <div class="detail-row"><span class="label">Estimated Cycles Remaining</span><span id="rul-cycles-remaining" class="value">--</span></div>
+                </div>
+
+                <div class="tip-box">
+                    <span class="tip-icon">⏳</span>
+                    <div>
+                        <div class="tip-title">Longevity Insight</div>
+                        <div id="rul-tip" class="tip-text">Keeping the pack cooler and avoiding deep discharge cycles both extend the projected RUL.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 5: Risk Evaluation -->
+            <section id="risk" class="tab-content">
+                <h2>System Risk Assessment</h2>
+                <div class="view-flex">
+                    <div id="risk-visual-box" class="risk-box"></div>
+                    <div class="status-readout">
+                        <h3 id="risk-level-text">--</h3>
+                        <p>Overall risk is the worst-case result across all individual safety checks below.</p>
+                    </div>
+                </div>
+
+                <div class="check-list">
+                    <div class="check-item">
+                        <span id="risk-check-voltage-icon" class="check-icon ok">✓</span>
+                        <div class="check-body">
+                            <div class="check-name">Voltage Range</div>
+                            <div id="risk-check-voltage-detail" class="check-detail">Waiting for telemetry…</div>
+                        </div>
+                    </div>
+                    <div class="check-item">
+                        <span id="risk-check-temp-icon" class="check-icon ok">✓</span>
+                        <div class="check-body">
+                            <div class="check-name">Thermal Range</div>
+                            <div id="risk-check-temp-detail" class="check-detail">Waiting for telemetry…</div>
+                        </div>
+                    </div>
+                    <div class="check-item">
+                        <span id="risk-check-current-icon" class="check-icon ok">✓</span>
+                        <div class="check-body">
+                            <div class="check-name">Current Draw</div>
+                            <div id="risk-check-current-detail" class="check-detail">Waiting for telemetry…</div>
+                        </div>
+                    </div>
+                    <div class="check-item">
+                        <span id="risk-check-soc-icon" class="check-icon ok">✓</span>
+                        <div class="check-body">
+                            <div class="check-name">Charge Level</div>
+                            <div id="risk-check-soc-detail" class="check-detail">Waiting for telemetry…</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tip-box">
+                    <span class="tip-icon">⚠️</span>
+                    <div>
+                        <div class="tip-title">Risk Guidance</div>
+                        <div id="risk-tip" class="tip-text">Each check is monitored continuously against safe operating thresholds for this pack.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 6: AI Diagnostics -->
+            <section id="ai" class="tab-content">
+                <h2>Edge AI Safety Engine</h2>
+                <div class="view-flex">
+                    <div class="ai-scan"></div>
+                    <div class="status-readout">
+                        <h3 id="ai-verdict">--</h3>
+                        <p>Edge inference summarizing thermal, electrical and cycle-wear signals from the ESP32 in real time.</p>
+                    </div>
+                </div>
+
+                <div class="check-list">
+                    <div class="check-item">
+                        <span id="ai-check-thermal-icon" class="check-icon ok">✓</span>
+                        <div class="check-body">
+                            <div class="check-name">Thermal Behavior</div>
+                            <div id="ai-check-thermal-detail" class="check-detail">Waiting for telemetry…</div>
+                        </div>
+                    </div>
+                    <div class="check-item">
+                        <span id="ai-check-voltage-icon" class="check-icon ok">✓</span>
+                        <div class="check-body">
+                            <div class="check-name">Voltage Stability</div>
+                            <div id="ai-check-voltage-detail" class="check-detail">Waiting for telemetry…</div>
+                        </div>
+                    </div>
+                    <div class="check-item">
+                        <span id="ai-check-balance-icon" class="check-icon ok">✓</span>
+                        <div class="check-body">
+                            <div class="check-name">Cell Balancing</div>
+                            <div id="ai-check-balance-detail" class="check-detail">Waiting for telemetry…</div>
+                        </div>
+                    </div>
+                    <div class="check-item">
+                        <span id="ai-check-mos-icon" class="check-icon ok">✓</span>
+                        <div class="check-body">
+                            <div class="check-name">MOSFET Switching</div>
+                            <div id="ai-check-mos-detail" class="check-detail">Waiting for telemetry…</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tip-box">
+                    <span class="tip-icon">🤖</span>
+                    <div>
+                        <div class="tip-title">AI Suggestion</div>
+                        <div id="ai-tip" class="tip-text">The diagnostics engine will recommend an action here as soon as it detects a deviation from normal behavior.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 7: Smart Charging -->
+            <section id="charging" class="tab-content">
+                <h2>Smart Charging Advisor</h2>
+                <div style="display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 20px;">
+                    <div class="charge-card" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 18px 20px;">
+                        <div style="font-size: 0.72rem; text-transform: uppercase; opacity: 0.55; margin-bottom: 6px;">Charging Recommendation</div>
+                        <div id="charge-recommendation" style="font-size: 1.25rem; font-weight: 600;">Awaiting ESP32 Telemetry...</div>
+                    </div>
+                </div>
+
+                <div class="charge-detail-grid">
+                    <div class="charge-mini-card">
+                        <div class="mini-label">Est. Time to Full</div>
+                        <div id="charge-time-to-full" class="mini-value">--</div>
+                    </div>
+                    <div class="charge-mini-card">
+                        <div class="mini-label">Suggested Charge Rate</div>
+                        <div id="charge-rate-suggestion" class="mini-value">--</div>
+                    </div>
+                    <div class="charge-mini-card">
+                        <div class="mini-label">Charge MOSFET</div>
+                        <div id="charge-mos-status" class="mini-value">--</div>
+                    </div>
+                    <div class="charge-mini-card">
+                        <div class="mini-label">Pack Temperature</div>
+                        <div id="charge-temp-readout" class="mini-value">--</div>
+                    </div>
+                </div>
+
+                <div class="tip-box">
+                    <span class="tip-icon">💡</span>
+                    <div>
+                        <div class="tip-title">Smart Charging Tip</div>
+                        <div id="charging-tip" class="tip-text">For longest pack life, avoid charging above 40°C and try to keep the pack between 20–80% for daily use.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 8: Fast Charge Advisor -->
+            <section id="fastcharge" class="tab-content">
+                <h2>Fast Charge Advisor</h2>
+
+                <div id="fastcharge-verdict" class="fastcharge-verdict">
+                    <span id="fc-icon" class="fc-icon">⚡</span>
+                    <div>
+                        <h3 id="fc-verdict-text">Awaiting Telemetry…</h3>
+                        <p id="fc-verdict-subtext">Connect the ESP32 gateway to evaluate fast-charge suitability.</p>
+                    </div>
+                </div>
+
+                <div class="check-list">
+                    <div class="check-item">
+                        <span id="fc-check-temp-icon" class="check-icon ok">✓</span>
+                        <div class="check-body">
+                            <div class="check-name">Pack Temperature</div>
+                            <div id="fc-check-temp-detail" class="check-detail">Waiting for telemetry…</div>
+                        </div>
+                    </div>
+                    <div class="check-item">
+                        <span id="fc-check-soc-icon" class="check-icon ok">✓</span>
+                        <div class="check-body">
+                            <div class="check-name">Charge Level</div>
+                            <div id="fc-check-soc-detail" class="check-detail">Waiting for telemetry…</div>
+                        </div>
+                    </div>
+                    <div class="check-item">
+                        <span id="fc-check-voltage-icon" class="check-icon ok">✓</span>
+                        <div class="check-body">
+                            <div class="check-name">Voltage Headroom</div>
+                            <div id="fc-check-voltage-detail" class="check-detail">Waiting for telemetry…</div>
+                        </div>
+                    </div>
+                    <div class="check-item">
+                        <span id="fc-check-mos-icon" class="check-icon ok">✓</span>
+                        <div class="check-body">
+                            <div class="check-name">Charge MOSFET &amp; Protection</div>
+                            <div id="fc-check-mos-detail" class="check-detail">Waiting for telemetry…</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tip-box">
+                    <span class="tip-icon">⚡</span>
+                    <div>
+                        <div class="tip-title">Fast Charging Guidance</div>
+                        <div id="fc-tip" class="tip-text">Fast charging is generally safe between 10–35°C, below 80% state of charge, and with no active protection faults.</div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Floating Help & AI Assistant Launcher (fixed to viewport, always visible) -->
+    <div id="help-widget" class="help-widget">
+        <div id="help-menu" class="help-menu">
+            <button class="help-menu-item" onclick="openHelpline()">
+                <span class="help-menu-icon">📞</span> Call Helpline
+            </button>
+            <button class="help-menu-item" onclick="openAIChat()">
+                <span class="help-menu-icon">🤖</span> AI Battery Assistant
+            </button>
+        </div>
+        <button id="help-fab" class="help-fab" onclick="toggleHelpMenu(event)" title="Help &amp; Support" aria-label="Help &amp; Support">
+            <span class="help-fab-ring"></span>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="9.5" stroke="white" stroke-width="1.6" opacity="0.55"/>
+                <path d="M9.3 9.4a2.7 2.7 0 0 1 5.2.9c0 1.8-2.5 2.1-2.5 3.9" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="17.3" r="0.95" fill="white"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Helpline Modal -->
+    <div id="helpline-modal" class="help-modal-overlay" onclick="closeHelplineOnOverlay(event)">
+        <div class="help-modal glass">
+            <button class="help-modal-close" onclick="closeHelpline()">✕</button>
+            <h3>📞 Battery Support Helpline</h3>
+            <p class="help-modal-sub">Talk to a technician for anything the dashboard can't resolve on its own — thermal events, unexplained faults, or hardware concerns.</p>
+
+            <div class="helpline-option">
+                <div>
+                    <div class="hl-label">General Support</div>
+                    <div class="hl-value">+91 1800-000-0000</div>
+                </div>
+                <span class="hl-icon">📞</span>
+            </div>
+            <div class="helpline-option">
+                <div>
+                    <div class="hl-label">Available</div>
+                    <div class="hl-value">Mon–Sat, 9 AM – 8 PM IST</div>
+                </div>
+                <span class="hl-icon">🕐</span>
+            </div>
+
+            <a href="tel:+911800000000" class="btn-primary help-call-btn">Call Now</a>
+            <p class="help-modal-footnote">Replace this placeholder number with your real support line before going live.</p>
+        </div>
+    </div>
+
+    <!-- AI Battery Assistant Chat Panel -->
+    <div id="ai-chat-panel" class="ai-chat-panel">
+        <div class="ai-chat-header">
+            <div>
+                <div class="ai-chat-title">🤖 AI Battery Assistant</div>
+                <div class="ai-chat-subtitle">Reads your live pack data</div>
+            </div>
+            <button class="ai-chat-close" onclick="closeAIChat()">✕</button>
+        </div>
+
+        <div id="ai-chat-messages" class="ai-chat-messages"></div>
+
+        <div class="ai-chat-suggestions">
+            <button class="ai-chip" onclick="askAIChip('Why is my battery heating up?')">Overheating</button>
+            <button class="ai-chip" onclick="askAIChip('Why is charging so slow?')">Slow charging</button>
+            <button class="ai-chip" onclick="askAIChip('Is my battery healthy?')">Battery health</button>
+            <button class="ai-chip" onclick="askAIChip('Can I fast charge right now?')">Fast charge</button>
+        </div>
+
+        <div class="ai-chat-input-row">
+            <input type="text" id="ai-chat-input" placeholder="Describe the issue or ask a question…" onkeydown="if(event.key==='Enter'){sendAIChatMessage();}" />
+            <button class="ai-chat-send" onclick="sendAIChatMessage()" aria-label="Send">➤</button>
+        </div>
+    </div>
+
+    <!-- External JS file link -->
+    <script src="script.js"></script>
+</body>
+</html>
